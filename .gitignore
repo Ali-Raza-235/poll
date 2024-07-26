@@ -1,0 +1,129 @@
+# Python specific
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyd
+*.so
+
+# Django specific
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.DS_Store
+*.env
+*.coverage
+.coverage.*
+*.cover
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environments
+.Python
+.mypy_cache/
+.pytest_cache/
+.tox/
+coverage.xml
+htmlcov/
+nosetests.xml
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.pytest_cache
+.pytest_cache/
+pytest_cache/
+tox.ini
+.nox/
+.mypy_cache/
+coverage/
+htmlcov/
+*.cover
+
+# Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store?
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite3
+
+# Media folder
+/media
+/media/
+
+# Local development
+/local_settings.py
+/local_settings.pyc
+
+# Secret files
+.env
+.env.*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Unit test / coverage reports
+coverage/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.coverage
+.coverage.*
+
+# Translations
+*.mo
+*.pot
+
+# Static files
+/static
+/staticfiles/
+
+# Sphinx documentation
+docs/_build/
