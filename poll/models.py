@@ -1,10 +1,10 @@
 from django.db import models
-from app.models import CustomUser
+from app.models import User
 
 # Create your models here.
 class Poll(models.Model):
     title = models.CharField(max_length=500)
-    creater = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    creater = models.ForeignKey(User, on_delete=models.CASCADE)
     questions = models.ManyToManyField('Question')
     is_open = models.BooleanField(default=True)
 
