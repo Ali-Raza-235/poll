@@ -2,7 +2,7 @@
 app/__pycache__/
 poll/migrations
 app/migrations/__pycache__/
-poll/migrations/__pycache__/
+app/migrations/__pycache__/
 core/__pycache__
 core/__pycache__/
 __pycache__/

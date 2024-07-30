@@ -42,3 +42,20 @@ class User(AbstractUser, AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.first_name
+
+
+class Poll(models.Model):
+    title = models.CharField(max_length=500)
+    creater = models.ForeignKey(User, on_delete=models.CASCADE)
+    questions = models.ManyToManyField('Question')
+    is_open = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return self.title
+    
+class Question(models.Model):
+    title = models.CharField(max_length=500)
+    choices = models.TextField(help_text="Enter Choices By using comma to separte")
+
+    def __str__(self) -> str:
+        return self.title
