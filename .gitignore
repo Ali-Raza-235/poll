@@ -4,6 +4,7 @@ app/migrations/__pycache__/
 core/__pycache__
 core/__pycache__/
 __pycache__/
+poll/management/commands/__pycache__
 *.py[cod]
 *.pyo
 *.pyd
