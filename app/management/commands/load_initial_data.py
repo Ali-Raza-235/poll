@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from app.models import User
-from poll.models import Poll, Question
+from app.models import User, Poll, Question
+
 
 class Command(BaseCommand):
     help = 'Load initial data into the database'
