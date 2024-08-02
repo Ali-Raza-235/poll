@@ -23,6 +23,7 @@ class PollSerializer(serializers.ModelSerializer):
         poll = Poll.objects.create(creater=user, **validated_data)
         
         for question_data in questions_data:
-            Question.objects.create(**question_data)
+            question = Question.objects.create(**question_data)
+            poll.questions.add(question)
         
         return poll
