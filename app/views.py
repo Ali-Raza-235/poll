@@ -1,6 +1,6 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView
 from .models import Poll
-from .serializers import PollSerializer
+from .serializers import PollSerializer, PollUpdateSerializer
 
 # Create your views here.
 
@@ -8,8 +8,12 @@ class PollView(ListCreateAPIView):
     queryset = Poll.objects.all()
     serializer_class = PollSerializer
 
-class DetialPollView(RetrieveUpdateDestroyAPIView):
+class DeletePollView(DestroyAPIView):
     queryset = Poll.objects.all()
     serializer_class = PollSerializer
-    http_method_names = ['put', 'delete', 'patch']
+    lookup_field = 'id'
+
+class UpdatePollView(UpdateAPIView):
+    queryset = Poll.objects.all()
+    serializer_class = PollUpdateSerializer
     lookup_field = 'id'
