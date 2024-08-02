@@ -11,5 +11,5 @@ class PollView(ListCreateAPIView):
 class DetialPollView(RetrieveUpdateDestroyAPIView):
     queryset = Poll.objects.all()
     serializer_class = PollSerializer
-    http_method_names = ['put', 'delete']
+    http_method_names = ['put', 'delete', 'patch']
     lookup_field = 'id'

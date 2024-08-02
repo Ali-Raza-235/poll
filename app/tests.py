@@ -15,43 +15,48 @@ class PollAPITestCase(APITestCase):
         self.poll.save()
 
     def test_create_poll(self):
-        url = reverse('poll-create')
+        url = reverse('creat-list-poll')
         data = {
-            "title": "New Poll",
-            "creater": self.user.id,
-            "questions": [self.question.id],
-            "is_open": True
+            'title': 'New Poll',
+            'creater': 'testuser@example.com',
+            'questions': [
+                {'title': 'New Question', 'choices': 'Option 1, Option 2'}
+            ],
+            'is_open': True
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['message'], "Your Data has been Saved Successfully")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['title'], 'New Poll')
+        self.assertEqual(response.data['creater'], 'testuser@example.com')
 
     def test_get_polls(self):
-        url = reverse('poll-create')
+        url = reverse('creat-list-poll')
         self.client.force_authenticate(user=self.user)
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['payload']), 1)
-        self.assertEqual(response.data['payload'][0]['title'], "Test Poll")
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], "Test Poll")
 
     def test_update_poll(self):
-        url = reverse('poll-detail', kwargs={'id': self.poll.id})
+        url = reverse('update-delete-poll', kwargs={'id': self.poll.id})
         data = {
-            "id": self.poll.id,
-            "title": "Updated Poll",
-            "creater": self.user.id,
-            "questions": [self.question.id],
-            "is_open": False
+            'title': 'Updated Poll',
+            'creater': 'testuser@example.com',
+            'questions': [
+                {'title': 'Updated Question', 'choices': 'Option 1, Option 2'}
+            ],
+            'is_open': False
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['message'], "Your data has been updated successfully.")
-        self.assertEqual(response.data['payload']['title'], "Updated Poll")
+        self.assertEqual(response.data['title'], 'Updated Poll')
+        self.assertEqual(response.data['creater'], 'testuser@example.com')
+        self.assertEqual(response.data['is_open'], False)
 
     def test_partial_update_poll(self):
-        url = reverse('poll-detail', kwargs={'id': self.poll.id})
+        url = reverse('update-delete-poll', kwargs={'id': self.poll.id})
         data = {
             "id": self.poll.id,
             "is_open": False
@@ -59,16 +64,14 @@ class PollAPITestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['message'], "Your data has been updated successfully.")
-        self.assertEqual(response.data['payload']['is_open'], False)
+        self.assertEqual(response.data['is_open'], False)
 
     def test_delete_poll(self):
-        url = reverse('poll-detail', kwargs={'id': self.poll.id})
+        url = reverse('update-delete-poll', kwargs={'id': self.poll.id})
         data = {
             "id": self.poll.id
         }
         self.client.force_authenticate(user=self.user)
-        response = self.client.delete(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['message'], "Record has been Deleted Successfully!")
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Poll.objects.filter(id=self.poll.id).exists())

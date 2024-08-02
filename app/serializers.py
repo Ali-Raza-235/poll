@@ -27,3 +27,23 @@ class PollSerializer(serializers.ModelSerializer):
             poll.questions.add(question)
         
         return poll
+    
+    def update(self, instance, validated_data):
+        questions_data = validated_data.pop('questions', None)
+        creater_email = validated_data.get('creater', instance.creater.email)
+
+        if creater_email != instance.creater.email:
+            user, created = User.objects.get_or_create(email=creater_email)
+            instance.creater = user
+
+        instance.title = validated_data.get('title', instance.title)
+        instance.is_open = validated_data.get('is_open', instance.is_open)
+        instance.save()
+
+        if questions_data is not None:
+     
+            for question_data in questions_data:
+                question = Question.objects.create(**question_data)
+                instance.questions.add(question)
+
+        return instance
