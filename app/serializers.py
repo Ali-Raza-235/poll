@@ -8,7 +8,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 class PollSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
-    creater = serializers.EmailField(write_only=True)
+    creater = serializers.EmailField()
 
     class Meta:
         model = Poll
