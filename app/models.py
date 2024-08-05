@@ -41,7 +41,7 @@ class Poll(models.Model):
         return self.title
     
 class Question(models.Model):
-    title = models.CharField(max_length=500)
+    title = models.CharField(max_length=500, unique=True)
     choices = models.TextField(help_text="Enter Choices By using comma to separte")
 
     def __str__(self) -> str:

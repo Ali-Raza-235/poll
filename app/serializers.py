@@ -27,3 +27,28 @@ class PollSerializer(serializers.ModelSerializer):
             poll.questions.add(question)
         
         return poll
+    
+class PollUpdateSerializer(serializers.ModelSerializer):
+    questions = QuestionSerializer(many=True)
+
+    class Meta:
+        model = Poll
+        fields = ['id', 'title', 'questions', 'is_open']
+
+    def update(self, instance, validated_data):
+        if 'creater' in validated_data:
+            raise serializers.ValidationError({'creater': 'The creater field cannot be updated.'})
+
+        questions_data = validated_data.pop('questions', None)
+
+        instance.title = validated_data.get('title', instance.title)
+        instance.is_open = validated_data.get('is_open', instance.is_open)
+        instance.save()
+
+        if questions_data is not None:
+            instance.questions.clear()
+            for question_data in questions_data:
+                question = Question.objects.create(**question_data)
+                instance.questions.add(question)
+
+        return instance
