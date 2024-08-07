@@ -1,4 +1,4 @@
-FROM python:3.8-buster
+FROM python:3.13.0rc1-bookworm
 
 ENV PYTHONBUFFERED=1
 
