@@ -1,5 +1,6 @@
 asgiref==3.8.1
 attrs==23.2.0
+dj-database-url==2.2.0
 Django==5.0.7
 djangorestframework==3.15.2
 drf-spectacular==0.27.2
@@ -7,9 +8,13 @@ drf-spectacular-sidecar==2024.7.1
 inflection==0.5.1
 jsonschema==4.23.0
 jsonschema-specifications==2023.12.1
+psycopg2==2.4
+psycopg2-binary==2.4
+python-decouple==3.8
 PyYAML==6.0.1
 referencing==0.35.1
 rpds-py==0.19.1
 sqlparse==0.5.1
+typing_extensions==4.12.2
 tzdata==2024.1
 uritemplate==4.1.1
