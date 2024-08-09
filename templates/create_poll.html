@@ -1,0 +1,21 @@
+{% include 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        <h3 class="text-center">Create Poll</h3>
+        <div class="mb-3">
+        <label for="creator" class="form-label">Creator Email</label>
+        <input type="email" class="form-control" id="creator" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+        <label for="poll" class="form-label">Poll Title</label>
+        <input type="text" class="form-control" id="poll">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Poll</button>
+    </form>
+</div>
+
+{% endblock content %}
