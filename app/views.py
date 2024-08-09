@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView
 from .models import Poll
 from .serializers import PollSerializer, PollUpdateSerializer
@@ -7,6 +8,9 @@ from .serializers import PollSerializer, PollUpdateSerializer
 class PollView(ListCreateAPIView):
     queryset = Poll.objects.all()
     serializer_class = PollSerializer
+
+    def get(self, request, *args, **kwargs):
+        return render(request, 'create_poll.html')
 
 class DeletePollView(DestroyAPIView):
     queryset = Poll.objects.all()
