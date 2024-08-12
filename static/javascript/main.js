@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="d-flex align-items-center mb-2">
                     <div class="flex-grow-1">
                         <label for="question_${questionIndex}" class="form-label">Question ${questionIndex}</label>
-                        <input type="text" class="form-control" id="question_${questionIndex}" name="questions[${questionIndex}][question]">
+                        <input type="text" class="form-control" id="question_${questionIndex}" name="questions[${questionIndex}][question]" required>
                     </div>
                     <button type="button" class="btn btn-danger btn-sm remove-question-btn ms-2">
                         <i class="fas fa-trash-alt"></i>
@@ -19,15 +19,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="mb-3">
                     <label for="option1_${questionIndex}" class="form-label">Option 1</label>
-                    <input type="text" class="form-control" id="option1_${questionIndex}" name="questions[${questionIndex}][option1]">
+                    <input type="text" class="form-control" id="option1_${questionIndex}" name="questions[${questionIndex}][option1]" required>
                 </div>
                 <div class="mb-3">
                     <label for="option2_${questionIndex}" class="form-label">Option 2</label>
-                    <input type="text" class="form-control" id="option2_${questionIndex}" name="questions[${questionIndex}][option2]">
+                    <input type="text" class="form-control" id="option2_${questionIndex}" name="questions[${questionIndex}][option2]" required>
                 </div>
                 <div class="mb-3">
                     <label for="option3_${questionIndex}" class="form-label">Option 3</label>
-                    <input type="text" class="form-control" id="option3_${questionIndex}" name="questions[${questionIndex}][option3]">
+                    <input type="text" class="form-control" id="option3_${questionIndex}" name="questions[${questionIndex}][option3]" required>
                 </div>
             </div>
         `;

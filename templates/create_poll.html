@@ -8,34 +8,34 @@
         <h3 class="text-center">Create Poll</h3>
         <div class="mb-3">
             <label for="creator" class="form-label">Creator Email</label>
-            <input type="email" class="form-control" id="creator" name="creator" aria-describedby="emailHelp">
+            <input type="email" class="form-control" id="creator" name="creator" aria-describedby="emailHelp" required>
         </div>
         <div class="mb-3">
             <label for="poll" class="form-label">Poll Title</label>
-            <input type="text" class="form-control" id="poll" name="poll">
+            <input type="text" class="form-control" id="poll" name="poll" required>
         </div>
         <div id="questions-container">
             <!-- First Question Form -->
             <div class="question-form">
                 <div class="mb-3">
                     <label for="question_1" class="form-label">Question 1</label>
-                    <input type="text" class="form-control" id="question_1" name="questions[1][question]">
+                    <input type="text" class="form-control" id="question_1" name="questions[1][question]" required>
                 </div>
                 <div class="mb-3">
                     <label for="option1_1" class="form-label">Option 1</label>
-                    <input type="text" class="form-control" id="option1_1" name="questions[1][option1]">
+                    <input type="text" class="form-control" id="option1_1" name="questions[1][option1]" required>
                 </div>
                 <div class="mb-3">
                     <label for="option2_1" class="form-label">Option 2</label>
-                    <input type="text" class="form-control" id="option2_1" name="questions[1][option2]">
+                    <input type="text" class="form-control" id="option2_1" name="questions[1][option2]" required>
                 </div>
                 <div class="mb-3">
                     <label for="option3_1" class="form-label">Option 3</label>
-                    <input type="text" class="form-control" id="option3_1" name="questions[1][option3]">
+                    <input type="text" class="form-control" id="option3_1" name="questions[1][option3]" required>
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-primary" id="add-question-btn">Add Question</button> <br><br>
+        <button type="button" class="btn btn-primary" id="add-question-btn">Add Question</button>
         <div class="text-center">
             <button type="submit" class="btn btn-primary">Create Poll</button>
         </div>
