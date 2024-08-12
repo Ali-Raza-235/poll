@@ -28,8 +28,13 @@ body {
     max-width: 100%;
 }
 
-#questions-container .question-form {
-    margin-top: 20px;
+#add-question-btn {
+    margin-left: 40px;
+    margin-top: 0;
+}
+
+#questions-container {
+    padding: 20px;
 }
 
 .form-poll {
