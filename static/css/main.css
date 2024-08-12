@@ -1,0 +1,16 @@
+.question-form {
+    border: 1px solid #ced4da;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+}
+
+.question-form .form-control {
+    max-width: 100%;
+}
+
+#questions-container .question-form {
+    margin-top: 20px;
+}
+

@@ -129,7 +129,6 @@ coverage.xml
 *.pot
 
 # Static files
-/static
 /staticfiles/
 
 # Sphinx documentation
