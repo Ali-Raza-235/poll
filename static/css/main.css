@@ -1,9 +1,27 @@
+body {
+    padding: 10px 0;
+}
 .question-form {
+    position: relative;
     border: 1px solid #ced4da;
     padding: 15px;
     border-radius: 5px;
+    margin-left: 20px;
     margin-bottom: 20px;
     background-color: #f8f9fa;
+}
+
+.remove-question-btn {
+    position: absolute;
+    right: 10px;
+    top: 15px;
+    background: transparent;
+    border: none;
+    color: #dc3545;
+}
+
+.remove-question-btn i {
+    font-size: 1.2em;
 }
 
 .question-form .form-control {
