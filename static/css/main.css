@@ -13,8 +13,8 @@ body {
 
 .remove-question-btn {
     position: absolute;
-    right: 10px;
-    top: 15px;
+    right: 18px;
+    top: 10px;
     background: transparent;
     border: none;
     color: #dc3545;
@@ -30,5 +30,9 @@ body {
 
 #questions-container .question-form {
     margin-top: 20px;
+}
+
+.form-poll {
+    width: 50%;
 }
 
