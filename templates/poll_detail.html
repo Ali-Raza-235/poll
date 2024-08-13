@@ -1,0 +1,30 @@
+{% include 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h3>{{ poll.title }}</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="text-center">
+           <h4> <p class="text-white bg-dark py-3"> <b>Poll Creater:</b> {{poll.creater.email}}</p></h4>
+        </div>
+
+        {% for question in questions %}
+        <div class="mb-4">
+            <h5>{{ question.title }}</h5>
+            {% for choice in question.choices %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="question_{{ forloop.counter }}" id="option_{{ forloop.counter }}" value="{{ choice }}">
+                <label class="form-check-label" for="option_{{ forloop.counter }}">
+                    {{ choice }}
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock content %}
