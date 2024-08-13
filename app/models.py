@@ -46,3 +46,18 @@ class Question(models.Model):
 
     def __str__(self) -> str:
         return self.title
+    
+class PollResponse(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name="responses")
+    user_email = models.EmailField()
+
+    def __str__(self):
+        return f"{self.user_email} - {self.poll.title}"
+
+class PollAnswer(models.Model):
+    response = models.ForeignKey(PollResponse, on_delete=models.CASCADE, related_name="answers")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.CharField(max_length=500, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.response.user_email} - {self.question.title} - {self.answer}"

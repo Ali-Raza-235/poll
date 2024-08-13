@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import User, Poll, Question
+from . models import User, Poll, Question, PollAnswer, PollResponse
 # Register your models here.
 
 class UserAdmin(admin.ModelAdmin):
@@ -12,4 +12,6 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Poll)
+admin.site.register(PollAnswer)
+admin.site.register(PollResponse)
 admin.site.register(Question)

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView
-from .models import Poll, User, Question
+from .models import Poll, User, Question, PollAnswer, PollResponse
 from .serializers import PollSerializer, PollUpdateSerializer
 from django.contrib import messages
 
@@ -66,16 +66,38 @@ def list_polls(request):
 
 def poll_detail(request, id):
     poll = get_object_or_404(Poll, id=id)
-    questions = []
+    questions = poll.questions.all()
 
-    for question in poll.questions.all():
+    question_data = []
+
+    for question in questions:
         choices = question.choices.split(',')
-        questions.append({
+        question_data.append({
             "id": question.id,
             'title': question.title,
             'choices': choices,
         })
 
-    context = {'poll': poll, 'questions': questions}
+    if request.method == "POST":
+        user_email = request.POST.get('user_email')
+
+        poll_response, created = PollResponse.objects.get_or_create(
+            poll=poll,
+            user_email=user_email,
+        )
+
+        for question in questions:
+            answer = request.POST.get(f'question_{question.id}')
+            if answer:
+                PollAnswer.objects.update_or_create(
+                    response=poll_response,
+                    question=question,
+                    defaults={'answer': answer}
+                )
+
+        messages.success(request, 'Your responses have been submitted successfully!')
+        return redirect('/')
+
+    context = {'poll': poll, 'questions': question_data}
 
     return render(request, 'poll_detail.html', context=context)
