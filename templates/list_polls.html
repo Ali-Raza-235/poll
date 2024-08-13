@@ -17,7 +17,7 @@
         <tbody>
             {% for poll in polls %}
             <tr>
-                <td>{{ poll.title }}</td>
+                <td> <a href="{% url 'poll-detail' poll.id %}"> {{ poll.title }} </a></td>
                 <td>{{ poll.creater.email }}</td>
             </tr>
             {% endfor %}

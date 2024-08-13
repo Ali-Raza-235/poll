@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView
 from .models import Poll, User, Question
 from .serializers import PollSerializer, PollUpdateSerializer
@@ -63,3 +63,18 @@ class UpdatePollView(UpdateAPIView):
 def list_polls(request):
     polls = Poll.objects.all()
     return render(request, 'list_polls.html', {'polls': polls})
+
+def poll_detail(request, id):
+    poll = get_object_or_404(Poll, id=id)
+    questions = []
+
+    for question in poll.questions.all():
+        choices = question.choices.split(',')
+        questions.append({
+            'title': question.title,
+            'choices': choices,
+        })
+
+    context = {'poll': poll, 'questions': questions}
+
+    return render(request, 'poll_detail.html', context=context)
