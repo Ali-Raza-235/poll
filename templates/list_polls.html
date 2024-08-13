@@ -1,0 +1,27 @@
+{% include 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>All Polls</h3>
+        <a href="{% url 'create-poll' %}" class="btn btn-primary">Create New Poll</a>
+    </div>
+
+    <table class="table table-bordered table-striped border-dark">
+        <thead>
+            <tr>
+                <th>Poll Title</th>
+                <th>Creator Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for poll in polls %}
+            <tr>
+                <td>{{ poll.title }}</td>
+                <td>{{ poll.creater.email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

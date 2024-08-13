@@ -59,3 +59,7 @@ class UpdatePollView(UpdateAPIView):
     queryset = Poll.objects.all()
     serializer_class = PollUpdateSerializer
     lookup_field = 'id'
+
+def list_polls(request):
+    polls = Poll.objects.all()
+    return render(request, 'list_polls.html', {'polls': polls})

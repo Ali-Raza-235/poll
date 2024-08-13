@@ -19,12 +19,13 @@ from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf import settings
 from django.conf.urls.static import static
-from app.views import PollView
+from app.views import PollView, list_polls
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", PollView.as_view(), name="create-list-poll"),
+    path("", PollView.as_view(), name="create-poll"),
+    path("list-polls/", list_polls, name="list-polls"),
     path('api/' ,include('app.urls')),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
