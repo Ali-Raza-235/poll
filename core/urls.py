@@ -24,8 +24,8 @@ from app.views import PollView, list_polls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", PollView.as_view(), name="create-poll"),
-    path("list-polls/", list_polls, name="list-polls"),
+    path("create-poll", PollView.as_view(), name="create-poll"),
+    path("", list_polls, name="list-polls"),
     path('api/' ,include('app.urls')),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
