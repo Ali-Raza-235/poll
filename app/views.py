@@ -71,6 +71,7 @@ def poll_detail(request, id):
     for question in poll.questions.all():
         choices = question.choices.split(',')
         questions.append({
+            "id": question.id,
             'title': question.title,
             'choices': choices,
         })
