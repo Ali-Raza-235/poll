@@ -2,8 +2,10 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h3>{{ poll.title }}</h3>
-
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>{{ poll.title }}</h3>
+        <a href="{% url 'list-polls' %}" class="btn btn-secondary">Back to Polls</a>
+    </div>
     <form method="POST">
         {% csrf_token %}
         <div class="text-center">

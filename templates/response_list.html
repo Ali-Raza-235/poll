@@ -1,0 +1,44 @@
+{% include 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Poll Responses for "{{ poll.title }}"</h3>
+        <a href="{% url 'list-polls' %}" class="btn btn-secondary">Back to Polls</a>
+    </div>
+
+    {% if responses %}
+        {% for question in poll.questions.all %}
+            <div class="mb-4">
+                <h5>{{ question.title }} 
+                    <span class="badge bg-primary">
+                        Total Responses: {{ question.pollanswer_set.count }}
+                    </span>
+                </h5>
+                <table class="table table-bordered table-striped border-dark mt-2">
+                    <thead>
+                        <tr>
+                            <th>User Email</th>
+                            <th>Answer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for answer in question.pollanswer_set.all %}
+                        <tr>
+                            <td>{{ answer.response.user_email }}</td>
+                            <td>{{ answer.answer }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+    <div class="no-responses text-center mt-5">
+        <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
+        <h4>No Responses Found</h4>
+        <p class="text-muted">There are no responses for this poll yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

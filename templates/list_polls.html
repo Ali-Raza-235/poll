@@ -12,6 +12,7 @@
             <tr>
                 <th>Poll Title</th>
                 <th>Creator Email</th>
+                <th>Poll Responses</th>
             </tr>
         </thead>
         <tbody>
@@ -19,6 +20,7 @@
             <tr>
                 <td> <a href="{% url 'poll-detail' poll.id %}"> {{ poll.title }} </a></td>
                 <td>{{ poll.creater.email }}</td>
+                <td><a href="{% url 'poll-responses' poll.id %}"> Responses </a></td>
             </tr>
             {% endfor %}
         </tbody>
