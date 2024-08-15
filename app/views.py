@@ -101,3 +101,14 @@ def poll_detail(request, id):
     context = {'poll': poll, 'questions': question_data}
 
     return render(request, 'poll_detail.html', context=context)
+
+def poll_responses(request, id):
+    poll = get_object_or_404(Poll, id=id)
+    responses = PollResponse.objects.filter(poll=poll)
+
+    context = {
+        "poll": poll,
+        "responses": responses,
+    }
+
+    return render(request, 'response_list.html', context=context)

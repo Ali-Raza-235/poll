@@ -1,11 +1,13 @@
 {% include 'base.html' %}
 
 {% block content %}
-
 <div class="container form-poll">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-center">Create Poll</h3>
+        <a href="{% url 'list-polls' %}" class="btn btn-secondary">Back to Polls</a>
+    </div>
     <form method="post">
         {% csrf_token %}
-        <h3 class="text-center">Create Poll</h3>
         <div class="mb-3">
             <label for="creator" class="form-label">Creator Email</label>
             <input type="email" class="form-control" id="creator" name="creator" aria-describedby="emailHelp" required>
@@ -41,5 +43,4 @@
         </div>
     </form>
 </div>
-
 {% endblock content %}
