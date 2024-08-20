@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView
 from .models import Poll, User, Question, PollAnswer, PollResponse
 from .serializers import PollSerializer, PollUpdateSerializer
+from django.core.paginator import Paginator
 from django.contrib import messages
 
 # Create your views here.
@@ -61,8 +62,12 @@ class UpdatePollView(UpdateAPIView):
     lookup_field = 'id'
 
 def list_polls(request):
-    polls = Poll.objects.all()
-    return render(request, 'list_polls.html', {'polls': polls})
+    polls = Poll.objects.all().order_by('-is_open')
+    paginator = Paginator(polls, 4)
+    
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'list_polls.html', {'page_obj': page_obj})
 
 def poll_detail(request, id):
     poll = get_object_or_404(Poll, id=id)
