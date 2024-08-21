@@ -1,10 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView, ListAPIView
 from .models import Poll, User, Question, PollAnswer, PollResponse
 from .serializers import PollSerializer, PollUpdateSerializer
+from rest_framework.pagination import PageNumberPagination
+from django.core.paginator import Paginator
 from django.contrib import messages
 
 # Create your views here.
+
+class PollPagination(PageNumberPagination):
+    page_size = 4
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class PollView(ListCreateAPIView):
     queryset = Poll.objects.all()
@@ -60,9 +67,21 @@ class UpdatePollView(UpdateAPIView):
     serializer_class = PollUpdateSerializer
     lookup_field = 'id'
 
-def list_polls(request):
-    polls = Poll.objects.all()
-    return render(request, 'list_polls.html', {'polls': polls})
+class ListPollsView(ListAPIView):
+    pagination_class = PollPagination
+    serializer_class = PollSerializer
+
+    def get(self, request):
+        polls = Poll.objects.all().order_by('-is_open')
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(polls, request)
+        serializer = self.serializer_class(page, many=True)
+        
+        context = {
+            'page_obj': paginator.get_paginated_response(serializer.data).data,
+            'paginator': paginator,
+        }
+        return render(request, 'list_polls.html', context)
 
 def poll_detail(request, id):
     poll = get_object_or_404(Poll, id=id)
