@@ -1,8 +1,10 @@
 from django.urls import path
-from .views import PollView, DeletePollView, UpdatePollView
+from .views import PollView, DeletePollView, UpdatePollView, ListUserPollsView, RegisterView
 
 urlpatterns = [
-    path('polls/', PollView.as_view(), name='create-list-poll'),
-    path('polls/<int:id>/', UpdatePollView.as_view(), name='update-poll'),
-    path('polls/<int:id>/delete/', DeletePollView.as_view(), name='delete-poll'),
+    path('polls/', PollView.as_view(), name='poll_list_create'),
+    path('polls/my/', ListUserPollsView.as_view(), name='user_polls'),
+    path('polls/update/<int:id>/', UpdatePollView.as_view(), name='poll_update'),
+    path('polls/delete/<int:id>/', DeletePollView.as_view(), name='poll_delete'),
+    path('register/', RegisterView.as_view(), name='register'),
 ]

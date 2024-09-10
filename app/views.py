@@ -1,19 +1,41 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPIView, ListAPIView
+from rest_framework import generics, status
 from .models import Poll, User, Question, PollAnswer, PollResponse
-from .serializers import PollSerializer, PollUpdateSerializer
+from .serializers import PollSerializer, PollUpdateSerializer, RegisterSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from django.core.paginator import Paginator
 from django.contrib import messages
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.authtoken.models import Token
 
 # Create your views here.
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'email': user.email
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PollPagination(PageNumberPagination):
     page_size = 4
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-class PollView(ListCreateAPIView):
+class PollView(generics.ListCreateAPIView):
     queryset = Poll.objects.all()
     serializer_class = PollSerializer
 
@@ -56,18 +78,72 @@ class PollView(ListCreateAPIView):
 
         return render(request, 'create_poll.html')
 
+class DeletePollView(APIView):
+    permission_classes = [IsAuthenticated]
 
-class DeletePollView(DestroyAPIView):
-    queryset = Poll.objects.all()
+    def get(self, request, *args, **kwargs):
+        user_polls = Poll.objects.filter(creater=request.user)
+        if not user_polls.exists():
+            return Response({"message": "You don't have any polls to delete."}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = PollSerializer(user_polls, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        poll_id = kwargs.get('id', None)
+        if poll_id:
+            try:
+                poll = Poll.objects.get(id=poll_id)
+                if poll.creater != request.user:
+                    raise PermissionDenied("You do not have permission to delete this poll.")
+                poll.delete()
+                return Response({"message": "Poll deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+            except Poll.DoesNotExist:
+                return Response({"message": "Poll not found."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({"message": "Please provide a poll ID to delete."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class UpdatePollView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user_polls = Poll.objects.filter(creater=request.user)
+        if not user_polls.exists():
+            return Response({"message": "You don't have any polls to update."}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = PollSerializer(user_polls, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, *args, **kwargs):
+        poll_id = kwargs.get('id', None)
+        if poll_id:
+            try:
+                poll = Poll.objects.get(id=poll_id)
+                if poll.creater != request.user:
+                    raise PermissionDenied("You do not have permission to update this poll.")
+                
+                serializer = PollUpdateSerializer(poll, data=request.data, partial=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except Poll.DoesNotExist:
+                return Response({"message": "Poll not found."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({"message": "Please provide a poll ID to update."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListUserPollsView(generics.ListAPIView):
     serializer_class = PollSerializer
-    lookup_field = 'id'
+    pagination_class = PollPagination
+    permission_classes = [IsAuthenticated]
 
-class UpdatePollView(UpdateAPIView):
-    queryset = Poll.objects.all()
-    serializer_class = PollUpdateSerializer
-    lookup_field = 'id'
+    def get_queryset(self):
+        return Poll.objects.filter(creater=self.request.user)
 
-class ListPollsView(ListAPIView):
+class ListPollsView(generics.ListAPIView):
     pagination_class = PollPagination
     serializer_class = PollSerializer
 
