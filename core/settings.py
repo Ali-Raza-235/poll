@@ -27,7 +27,7 @@ load_dotenv(os.path.join(BASE_DIR, ".eVar", ".env"))
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'aliraza.pythonanywhere.com']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
