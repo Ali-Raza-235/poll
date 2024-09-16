@@ -3,8 +3,8 @@ from rest_framework.generics import ListCreateAPIView, UpdateAPIView, DestroyAPI
 from .models import Poll, User, Question, PollAnswer, PollResponse
 from .serializers import PollSerializer, PollUpdateSerializer
 from rest_framework.pagination import PageNumberPagination
-from django.core.paginator import Paginator
 from django.contrib import messages
+from django.db import connection
 
 # Create your views here.
 
@@ -76,8 +76,11 @@ class ListPollsView(ListAPIView):
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(polls, request)
         serializer = self.serializer_class(page, many=True)
+
+        poll_data = [{'id': poll.id, 'title': poll.title, 'creater_id': poll.creater.id, 'is_open': poll.is_open} for poll in polls]
         
         context = {
+            'polls': poll_data,
             'page_obj': paginator.get_paginated_response(serializer.data).data,
             'paginator': paginator,
         }
@@ -131,3 +134,30 @@ def poll_responses(request, id):
     }
 
     return render(request, 'response_list.html', context=context)
+
+
+# Using raw() method to fetch open polls
+def get_open_polls_raw(request):
+    open_polls = Poll.objects.raw('SELECT * FROM app_poll WHERE is_open == %s', [True])
+
+    # Prepare poll data similar to queryset
+    poll_data = [{'id': poll.id, 'title': poll.title, 'creater_id': poll.creater.id, 'is_open': poll.is_open} for poll in open_polls]
+    
+    # Standard context format
+    context = {'polls': poll_data}
+
+    return render(request, 'list_polls.html', context)
+
+# Using connection.cursor() to fetch closed polls
+def get_closed_polls_cursor(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM app_poll WHERE is_open = %s", [False])
+        closed_polls = cursor.fetchall()
+
+    # Structure the data like queryset
+    poll_data = [{'id': row[0], 'title': row[1], 'creater_id': row[2], 'is_open': row[3]} for row in closed_polls]
+    
+    # Standard context format
+    context = {'polls': poll_data}
+
+    return render(request, 'list_polls.html', context)
