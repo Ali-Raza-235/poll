@@ -77,7 +77,7 @@ class ListPollsView(ListAPIView):
         page = paginator.paginate_queryset(polls, request)
         serializer = self.serializer_class(page, many=True)
 
-        poll_data = [{'id': poll.id, 'title': poll.title, 'creater_id': poll.creater.id, 'is_open': poll.is_open} for poll in polls]
+        poll_data = [{'id': poll.id, 'title': poll.title, 'creater_id': poll.creater.id, 'is_open': poll.is_open} for poll in page]
         
         context = {
             'polls': poll_data,

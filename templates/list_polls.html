@@ -26,12 +26,12 @@
         </tbody>
     </table>
 
-    <!-- Pagination logic -->
+    <!-- Pagination Controls -->
     <nav aria-label="Page navigation">
         <ul class="pagination">
-            {% if page_obj.has_previous %}
+            {% if paginator.page.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    <a class="page-link" href="?page={{ paginator.page.previous_page_number }}">Previous</a>
                 </li>
             {% else %}
                 <li class="page-item disabled">
@@ -39,8 +39,8 @@
                 </li>
             {% endif %}
 
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
+            {% for num in paginator.page.paginator.page_range %}
+                {% if paginator.page.number == num %}
                     <li class="page-item active">
                         <span class="page-link">{{ num }}</span>
                     </li>
@@ -51,9 +51,9 @@
                 {% endif %}
             {% endfor %}
 
-            {% if page_obj.has_next %}
+            {% if paginator.page.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a class="page-link" href="?page={{ paginator.page.next_page_number }}">Next</a>
                 </li>
             {% else %}
                 <li class="page-item disabled">
