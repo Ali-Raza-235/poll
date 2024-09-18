@@ -158,7 +158,6 @@ def get_closed_polls_cursor(request):
     return render(request, 'list_polls.html', context)
 
 def get_poll_with_user_detail(request, poll_id):
-    # Raw SQL query to get poll details, including the primary key 'p.id'
     poll_query = """
         SELECT p.id as poll_id, p.title as poll_title, u.email as creater_email
         FROM app_poll p
@@ -173,22 +172,20 @@ def get_poll_with_user_detail(request, poll_id):
         WHERE pq.poll_id = %s
     """
 
-    # Fetch poll data
     with connection.cursor() as cursor:
         cursor.execute(poll_query, [poll_id])
         poll_data = cursor.fetchone()
 
-    # If no poll found, return 404
     if not poll_data:
         return JsonResponse({"error": "Poll not found"}, status=404)
 
     poll_details = {
-        "poll_id": poll_data[0],  # poll_id from query
-        "title": poll_data[1],     # poll_title from query
-        "creater_email": poll_data[2]  # creater_email from query
+        "poll_id": poll_data[0], 
+        "title": poll_data[1],     
+        "creater_email": poll_data[2] 
     }
 
-    # Fetch questions related to the poll
+    
     with connection.cursor() as cursor:
         cursor.execute(question_query, [poll_id])
         questions_data = cursor.fetchall()
