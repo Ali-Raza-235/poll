@@ -5,6 +5,7 @@ from .serializers import PollSerializer, PollUpdateSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.contrib import messages
 from django.db import connection
+from django.http import JsonResponse
 
 # Create your views here.
 
@@ -136,28 +137,90 @@ def poll_responses(request, id):
     return render(request, 'response_list.html', context=context)
 
 
-# Using raw() method to fetch open polls
 def get_open_polls_raw(request):
     open_polls = Poll.objects.raw('SELECT * FROM app_poll WHERE is_open == %s', [True])
 
-    # Prepare poll data similar to queryset
     poll_data = [{'id': poll.id, 'title': poll.title, 'creater_id': poll.creater.id, 'is_open': poll.is_open} for poll in open_polls]
     
-    # Standard context format
     context = {'polls': poll_data}
 
     return render(request, 'list_polls.html', context)
 
-# Using connection.cursor() to fetch closed polls
 def get_closed_polls_cursor(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM app_poll WHERE is_open = %s", [False])
         closed_polls = cursor.fetchall()
 
-    # Structure the data like queryset
     poll_data = [{'id': row[0], 'title': row[1], 'creater_id': row[2], 'is_open': row[3]} for row in closed_polls]
     
-    # Standard context format
     context = {'polls': poll_data}
 
     return render(request, 'list_polls.html', context)
+
+def get_poll_with_user_detail(request, poll_id):
+    # Raw SQL query to get poll details, including the primary key 'p.id'
+    poll_query = """
+        SELECT p.id as poll_id, p.title as poll_title, u.email as creater_email
+        FROM app_poll p
+        INNER JOIN app_user u ON p.creater_id = u.id
+        WHERE p.id = %s
+    """
+
+    question_query = """
+        SELECT q.id as question_id, q.title as question_title
+        FROM app_poll_questions pq
+        INNER JOIN app_question q ON pq.question_id = q.id
+        WHERE pq.poll_id = %s
+    """
+
+    # Fetch poll data
+    with connection.cursor() as cursor:
+        cursor.execute(poll_query, [poll_id])
+        poll_data = cursor.fetchone()
+
+    # If no poll found, return 404
+    if not poll_data:
+        return JsonResponse({"error": "Poll not found"}, status=404)
+
+    poll_details = {
+        "poll_id": poll_data[0],  # poll_id from query
+        "title": poll_data[1],     # poll_title from query
+        "creater_email": poll_data[2]  # creater_email from query
+    }
+
+    # Fetch questions related to the poll
+    with connection.cursor() as cursor:
+        cursor.execute(question_query, [poll_id])
+        questions_data = cursor.fetchall()
+
+    poll_details["questions"] = [{"id": row[0], "title": row[1]} for row in questions_data]
+
+    return JsonResponse(poll_details)
+
+
+def get_poll_stats(request):
+    query = """
+        SELECT p.id as poll_id, p.title as poll_title, q.id as question_id, q.title as question_title, 
+               COUNT(a.id) as answer_count
+        FROM app_poll p
+        INNER JOIN app_poll_questions pq ON p.id = pq.poll_id
+        INNER JOIN app_question q ON q.id = pq.question_id
+        LEFT JOIN app_pollanswer a ON a.question_id = q.id
+        GROUP BY p.id, p.title, q.id, q.title
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+    poll_stats = []
+    for row in results:
+        poll_stats.append({
+            'poll_id': row[0],
+            'poll_title': row[1],
+            'question_id': row[2],
+            'question_title': row[3],
+            'answer_count': row[4]
+        })
+
+    return JsonResponse({'poll_stats': poll_stats})
