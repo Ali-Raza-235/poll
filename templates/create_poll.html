@@ -8,10 +8,17 @@
     </div>
     <form method="post">
         {% csrf_token %}
+        {% if request.user.is_authenticated %}
+        <div class="mb-3">
+            <label for="creator" class="form-label">Creator Email</label>
+            <input type="email" class="form-control" id="creator" name="creator" value="{{request.user.email}}" aria-describedby="emailHelp" disabled>
+        </div>
+        {% else %}
         <div class="mb-3">
             <label for="creator" class="form-label">Creator Email</label>
             <input type="email" class="form-control" id="creator" name="creator" aria-describedby="emailHelp" required>
         </div>
+        {% endif %}
         <div class="mb-3">
             <label for="poll" class="form-label">Poll Title</label>
             <input type="text" class="form-control" id="poll" name="poll" required>

@@ -12,6 +12,33 @@
 </head>
 <body>
 
+    <div class="container">
+        <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+          <div class="col-md-3 mb-2 mb-md-0">
+            <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
+                Voting System App
+            </a>
+          </div>
+    
+          <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="/" class="nav-link px-2 link-secondary">Home</a></li>
+            <li><a href="{% url 'create_poll' %}" class="nav-link px-2">Create poll</a></li>
+            <li><a href="{% url 'user_polls' %}" class="nav-link px-2">Your Polls</a></li>
+          </ul>
+          
+          {% if request.user.is_authenticated %}
+          <div class="col-md-3 text-end">
+            <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
+          </div>
+          {% else %}
+          <div class="col-md-3 text-end">
+            <a href="{% url 'login' %}" type="button" class="btn btn-outline-primary me-2">Login</a>
+            <a href="{% url 'register' %}" type="button" class="btn btn-primary">Sign-up</a>
+          </div>
+          {% endif %}
+        </header>
+      </div>
+
     {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}

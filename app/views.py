@@ -1,84 +1,105 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import generics, status
-from .models import Poll, User, Question, PollAnswer, PollResponse
-from .serializers import PollSerializer, PollUpdateSerializer, RegisterSerializer
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from django.contrib import messages
+from django.contrib import messages, auth
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.authtoken.models import Token
-
-# Create your views here.
-
+from .models import Poll, User, Question, PollAnswer, PollResponse
+from .serializers import PollSerializer, RegisterSerializer, LoginSerializer
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
+    def get(self, request, *args, **kwargs):
+        return render(request, 'register.html')
+
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.POST)
         if serializer.is_valid():
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
-            return Response({
-                'token': token.key,
-                'email': user.email
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return redirect('/')
+        return render(request, 'register.html', {'errors': serializer.errors})
 
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
+
+    def get(self, request, format=None):
+        return render(request, 'login.html')
+
+    def post(self, request, format=None):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = auth.authenticate(username=username, password=password)
+        
+        if user is not None:
+            auth.login(request, user)
+            token, created = Token.objects.get_or_create(user=user)
+            response = redirect('/')  # Adjust this to your desired redirect URL
+            response.set_cookie(key='auth_token', value=token.key)
+            return response
+        else:
+            return render(request, 'login.html', {'error': 'Invalid username or password'})
+
+class LogoutView(LoginRequiredMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        request.user.auth_token.delete()
+        auth.logout(request)
+        return redirect('login')
 
 class PollPagination(PageNumberPagination):
     page_size = 4
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-class PollView(generics.ListCreateAPIView):
+class CreatePollView(LoginRequiredMixin, generics.CreateAPIView):
     queryset = Poll.objects.all()
     serializer_class = PollSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         return render(request, 'create_poll.html')
     
     def post(self, request):
-        if request.method == "POST":
+        if request.user.is_authenticated:
+            creator_email = request.user.email
+        else:
             creator_email = request.POST.get('creator')
-            poll_title = request.POST.get('poll')
-            questions_data = request.POST.getlist('questions')
+        poll_title = request.POST.get('poll')
+        questions_data = request.POST.getlist('questions')
 
-            try:
-                creator = User.objects.get(email=creator_email)
-            except User.DoesNotExist:
-                creator = User.objects.create(email=creator_email)
+        creator, created = User.objects.get_or_create(email=creator_email)
 
-            poll = Poll.objects.create(title=poll_title, creater=creator)
+        poll = Poll.objects.create(title=poll_title, creater=creator)
 
-            question_index = 1
-            while f'questions[{question_index}][question]' in request.POST:
-                question_text = request.POST.get(f'questions[{question_index}][question]')
-                option1 = request.POST.get(f'questions[{question_index}][option1]')
-                option2 = request.POST.get(f'questions[{question_index}][option2]')
-                option3 = request.POST.get(f'questions[{question_index}][option3]')
+        question_index = 1
+        while f'questions[{question_index}][question]' in request.POST:
+            question_text = request.POST.get(f'questions[{question_index}][question]')
+            options = [request.POST.get(f'questions[{question_index}][option{i+1}]') for i in range(3)]
 
-                options = [option1, option2, option3]
+            if question_text:
+                question = Question.objects.create(title=question_text, choices=','.join(filter(None, options)))
+                poll.questions.add(question)
 
-                if question_text:
-                    question = Question.objects.create(title=question_text, choices=','.join(options))
-                    poll.questions.add(question)
+            question_index += 1
 
-                question_index += 1
+        poll.save()
 
-            poll.save()
+        messages.success(request, 'Poll has been Created Successfully!')
+        return redirect('/')
 
-            messages.success(request, 'Poll has been Created Sucessfully!')
-
-            return redirect('/')
-
-        return render(request, 'create_poll.html')
-
-class DeletePollView(APIView):
+class DeletePollView(LoginRequiredMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -97,58 +118,91 @@ class DeletePollView(APIView):
                 if poll.creater != request.user:
                     raise PermissionDenied("You do not have permission to delete this poll.")
                 poll.delete()
-                return Response({"message": "Poll deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+                messages.success(request, 'Poll deleted successfully.')
+                return redirect('user_polls')
             except Poll.DoesNotExist:
                 return Response({"message": "Poll not found."}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({"message": "Please provide a poll ID to delete."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def post(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
 
-
-
-class UpdatePollView(APIView):
+class UpdatePollView(LoginRequiredMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        user_polls = Poll.objects.filter(creater=request.user)
-        if not user_polls.exists():
-            return Response({"message": "You don't have any polls to update."}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = PollSerializer(user_polls, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def put(self, request, *args, **kwargs):
         poll_id = kwargs.get('id', None)
         if poll_id:
             try:
-                poll = Poll.objects.get(id=poll_id)
-                if poll.creater != request.user:
-                    raise PermissionDenied("You do not have permission to update this poll.")
-                
-                serializer = PollUpdateSerializer(poll, data=request.data, partial=True)
-                if serializer.is_valid():
-                    serializer.save()
-                    return Response(serializer.data, status=status.HTTP_200_OK)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                poll = Poll.objects.get(id=poll_id, creater=request.user)
+                questions = poll.questions.all()
+
+                question_data = [{'id': q.id, 'title': q.title, 'choices': q.choices.split(',')} for q in questions]
+
+                context = {
+                    'poll': poll,
+                    'questions': question_data,
+                }
+                return render(request, 'update_poll.html', context)
             except Poll.DoesNotExist:
                 return Response({"message": "Poll not found."}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({"message": "Please provide a poll ID to update."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "Please provide a poll ID to update."}, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request, *args, **kwargs):
+        poll_id = kwargs.get('id', None)
+        if poll_id:
+            try:
+                poll = Poll.objects.get(id=poll_id, creater=request.user)
+
+                # Update poll title and status
+                poll.title = request.POST.get('poll', poll.title)
+                poll.is_open = 'is_open' in request.POST
+
+                question_index = 1
+                while f'questions[{question_index}][question]' in request.POST:
+                    question_text = request.POST.get(f'questions[{question_index}][question]')
+                    options = [request.POST.get(f'questions[{question_index}][option{i+1}]') for i in range(3)]
+
+                    if question_text:
+                        question = Question.objects.create(title=question_text, choices=','.join(filter(None, options)))
+                        poll.questions.add(question)
+
+                    question_index += 1
+
+                poll.save()
+
+                messages.success(request, 'Poll has been updated successfully!')
+                return redirect('user_polls')  # Redirect after successful update
+            except Poll.DoesNotExist:
+                return Response({"message": "Poll not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Please provide a poll ID to update."}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ListUserPollsView(generics.ListAPIView):
+class ListUserPollsView(LoginRequiredMixin, generics.ListAPIView):
     serializer_class = PollSerializer
     pagination_class = PollPagination
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return Poll.objects.filter(creater=self.request.user)
+    def get(self, request, *args, **kwargs):
+        polls = Poll.objects.filter(creater=request.user)
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(polls, request)
+        serializer = self.serializer_class(page, many=True)
+        
+        context = {
+            'page_obj': paginator.get_paginated_response(serializer.data).data,
+            'paginator': paginator,
+        }
+        return render(request, 'user_polls.html', context)
 
 class ListPollsView(generics.ListAPIView):
     pagination_class = PollPagination
     serializer_class = PollSerializer
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        polls = Poll.objects.all().order_by('-is_open')
+        polls = Poll.objects.filter(is_open=True).order_by('-id')
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(polls, request)
         serializer = self.serializer_class(page, many=True)
@@ -159,6 +213,7 @@ class ListPollsView(generics.ListAPIView):
         }
         return render(request, 'list_polls.html', context)
 
+@login_required
 def poll_detail(request, id):
     poll = get_object_or_404(Poll, id=id)
     questions = poll.questions.all()
@@ -174,11 +229,10 @@ def poll_detail(request, id):
         })
 
     if request.method == "POST":
-        user_email = request.POST.get('user_email')
 
         poll_response, created = PollResponse.objects.get_or_create(
             poll=poll,
-            user_email=user_email,
+            user_email=request.user.email,
         )
 
         for question in questions:
