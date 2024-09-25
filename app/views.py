@@ -11,6 +11,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.authtoken.models import Token
 from .models import Poll, User, Question, PollAnswer, PollResponse
 from .serializers import PollSerializer, RegisterSerializer, LoginSerializer
+from django.db import transaction
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -155,14 +156,19 @@ class UpdatePollView(LoginRequiredMixin, APIView):
             try:
                 poll = Poll.objects.get(id=poll_id, creater=request.user)
 
-                # Update poll title and status
                 poll.title = request.POST.get('poll', poll.title)
                 poll.is_open = 'is_open' in request.POST
+
+                current_questions = list(poll.questions.all())
+
+                poll.questions.clear()
 
                 question_index = 1
                 while f'questions[{question_index}][question]' in request.POST:
                     question_text = request.POST.get(f'questions[{question_index}][question]')
-                    options = [request.POST.get(f'questions[{question_index}][option{i+1}]') for i in range(3)]
+                    options = [
+                        request.POST.get(f'questions[{question_index}][option{i+1}]') for i in range(3)
+                    ]
 
                     if question_text:
                         question = Question.objects.create(title=question_text, choices=','.join(filter(None, options)))
@@ -172,8 +178,11 @@ class UpdatePollView(LoginRequiredMixin, APIView):
 
                 poll.save()
 
+                for question in current_questions:
+                    question.delete()
+
                 messages.success(request, 'Poll has been updated successfully!')
-                return redirect('user_polls')  # Redirect after successful update
+                return redirect('user_polls')
             except Poll.DoesNotExist:
                 return Response({"message": "Poll not found."}, status=status.HTTP_404_NOT_FOUND)
         return Response({"message": "Please provide a poll ID to update."}, status=status.HTTP_400_BAD_REQUEST)
