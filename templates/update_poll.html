@@ -1,70 +1,57 @@
 {% include 'base.html' %}
 
 {% block content %}
-{% if request.user.is_authenticated %}
 <div class="container form-poll">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="text-center">Update Poll</h3>
         <a href="{% url 'list-polls' %}" class="btn btn-secondary">Back to Polls</a>
     </div>
-    <form method="post" action="{% url 'poll_update' poll.id %}">
+    <form method="post">
         {% csrf_token %}
+        {% if request.user.is_authenticated %}
         <div class="mb-3">
             <label for="creator" class="form-label">Creator Email</label>
-            <input type="email" class="form-control" id="creator" name="creator" value="{{ request.user.email }}" aria-describedby="emailHelp" disabled>
+            <input type="email" class="form-control" id="creator" name="creator" value="{{request.user.email}}" aria-describedby="emailHelp" disabled>
         </div>
+        {% else %}
+        <div class="mb-3">
+            <label for="creator" class="form-label">Creator Email</label>
+            <input type="email" class="form-control" id="creator" name="creator" aria-describedby="emailHelp" required>
+        </div>
+        {% endif %}
         <div class="mb-3">
             <label for="poll" class="form-label">Poll Title</label>
-            <input type="text" class="form-control" id="poll" name="poll" value="{{ poll.title }}" required>
-        </div>
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="is_open" name="is_open" {% if poll.is_open %}checked{% endif %}>
-            <label class="form-check-label" for="is_open">Poll is Open</label>
+            <input type="text" class="form-control" id="poll" name="poll" required value="{{ poll.title }}">
         </div>
         <div id="questions-container">
             {% for question in questions %}
-            <div class="question-form mb-3" id="question_{{ question.id }}">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="flex-grow-1">
-                        <label for="question_{{ question.id }}" class="form-label">Question {{ forloop.counter }}</label>
-                        <input type="text" class="form-control" id="question_{{ question.id }}" name="questions[{{ forloop.counter }}][title]" value="{{ question.title }}" required>
-                    </div>
+            <div class="question-form">
+                <div class="mb-3">
+                    <label for="question_{{ forloop.counter }}" class="form-label">Question {{ forloop.counter }}</label>
+                    <input type="text" class="form-control" id="question_{{ forloop.counter }}" name="questions[{{ forloop.counter }}][question]" required value="{{ question.title }}">
                     <button type="button" class="btn btn-danger btn-sm remove-question-btn ms-2">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
-                {% for choice in question.choices %}
-                <div class="mb-2">
-                    <label for="option_{{ question.id }}_{{ forloop.counter }}" class="form-label">Option {{ forloop.counter }}</label>
-                    <input type="text" class="form-control" id="option_{{ question.id }}_{{ forloop.counter }}" name="questions[{{ forloop.counter }}][choices]" value="{{ choice }}" required>
+                <div class="mb-3">
+                    <label for="option1_{{ forloop.counter }}" class="form-label">Option 1</label>
+                    <input type="text" class="form-control" id="option1_{{ forloop.counter }}" name="questions[{{ forloop.counter }}][option1]" required value="{{ question.choices.0 }}">
                 </div>
-                {% endfor %}
-                <input type="hidden" name="questions[{{ forloop.counter }}][id]" value="{{ question.id }}">
+                <div class="mb-3">
+                    <label for="option2_{{ forloop.counter }}" class="form-label">Option 2</label>
+                    <input type="text" class="form-control" id="option2_{{ forloop.counter }}" name="questions[{{ forloop.counter }}][option2]" required value="{{ question.choices.1 }}">
+                </div>
+                <div class="mb-3">
+                    <label for="option3_{{ forloop.counter }}" class="form-label">Option 3</label>
+                    <input type="text" class="form-control" id="option3_{{ forloop.counter }}" name="questions[{{ forloop.counter }}][option3]" required value="{{ question.choices.2 }}">
+                </div>
             </div>
             {% endfor %}
         </div>
-        <input type="hidden" name="delete_questions" id="delete_questions">
         <button type="button" class="btn btn-primary" id="add-question-btn">Add Question</button>
-        <div class="text-center mt-3">
+        <div class="text-center">
             <button type="submit" class="btn btn-primary">Update Poll</button>
         </div>
     </form>
 </div>
-<script>
-    function deleteQuestion(questionId) {
-        const deleteQuestionsInput = document.getElementById('delete_questions');
-        const currentValue = deleteQuestionsInput.value;
-        if (currentValue) {
-            deleteQuestionsInput.value = `${currentValue},${questionId}`;
-        } else {
-            deleteQuestionsInput.value = questionId;
-        }
-        document.getElementById(`question_${questionId}`).remove();
-    }
-</script>
-{% else %}
-<div class="container text-center">
-    <h3>Login is Required For updating poll</h3>
-</div>
-{% endif %}
 {% endblock content %}

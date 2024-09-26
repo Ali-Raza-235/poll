@@ -156,35 +156,32 @@ class UpdatePollView(LoginRequiredMixin, APIView):
             try:
                 poll = Poll.objects.get(id=poll_id, creater=request.user)
 
+                # Update the poll title
                 poll.title = request.POST.get('poll', poll.title)
-                poll.is_open = 'is_open' in request.POST
 
-                current_questions = list(poll.questions.all())
-
-                poll.questions.clear()
+                # Delete old questions
+                poll.questions.all().delete()
 
                 question_index = 1
                 while f'questions[{question_index}][question]' in request.POST:
                     question_text = request.POST.get(f'questions[{question_index}][question]')
-                    options = [
-                        request.POST.get(f'questions[{question_index}][option{i+1}]') for i in range(3)
-                    ]
+                    options = [request.POST.get(f'questions[{question_index}][option{i+1}]') for i in range(3)]
 
+                    # Ensure question text is not empty
                     if question_text:
-                        question = Question.objects.create(title=question_text, choices=','.join(filter(None, options)))
+                        # Create the question with title and choices
+                        question = Question.objects.create(title=question_text.strip(), choices=','.join(filter(None, options)))
                         poll.questions.add(question)
 
                     question_index += 1
 
                 poll.save()
 
-                for question in current_questions:
-                    question.delete()
-
                 messages.success(request, 'Poll has been updated successfully!')
                 return redirect('user_polls')
             except Poll.DoesNotExist:
                 return Response({"message": "Poll not found."}, status=status.HTTP_404_NOT_FOUND)
+
         return Response({"message": "Please provide a poll ID to update."}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -204,6 +201,16 @@ class ListUserPollsView(LoginRequiredMixin, generics.ListAPIView):
             'paginator': paginator,
         }
         return render(request, 'user_polls.html', context)
+
+class TogglePollStatusView(LoginRequiredMixin, APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, id):
+        poll = get_object_or_404(Poll, id=id, creater=request.user)
+        poll.is_open = not poll.is_open  # Toggle the is_open field
+        poll.save()
+        messages.success(request, 'Poll status updated successfully!')
+        return redirect('user_polls')
 
 class ListPollsView(generics.ListAPIView):
     pagination_class = PollPagination

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreatePollView, DeletePollView, UpdatePollView, ListUserPollsView, RegisterView, LogoutView, LoginView
+from .views import CreatePollView, DeletePollView, UpdatePollView, ListUserPollsView, TogglePollStatusView, RegisterView, LogoutView, LoginView
 
 urlpatterns = [
     path('create-poll/', CreatePollView.as_view(), name='create_poll'),
@@ -9,4 +9,5 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('polls/toggle/<int:id>/', TogglePollStatusView.as_view(), name='poll_toggle'),
 ]

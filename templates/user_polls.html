@@ -11,6 +11,7 @@
             <tr>
                 <th>Poll Title</th>
                 <th>Poll Responses</th>
+                <th>Is Open</th>
                 <th>Update</th>
                 <th>Delete</th>
             </tr>
@@ -20,6 +21,17 @@
             <tr>
                 <td><a href="{% url 'poll-detail' poll.id %}">{{ poll.title }}</a></td>
                 <td><a href="{% url 'poll-responses' poll.id %}">Responses</a></td>
+                <td>
+                    <form action="{% url 'poll_toggle' poll.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="is_open" id="is_open_{{ poll.id }}" onchange="this.form.submit();" {% if poll.is_open %}checked{% endif %}>
+                            <label class="form-check-label" for="is_open_{{ poll.id }}">
+                                {% if poll.is_open %}Open{% else %}Closed{% endif %}
+                            </label>
+                        </div>
+                    </form>
+                </td>
                 <td>
                     <a class="btn btn-primary" href="{% url 'poll_update' poll.id %}">Update</a>
                 </td>
