@@ -1,6 +1,24 @@
 from rest_framework import serializers
 from .models import Poll, Question, User
 
+
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+        return user
+
+class LoginSerializer(serializers.Serializer):
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question

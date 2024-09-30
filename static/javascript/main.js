@@ -2,10 +2,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const questionsContainer = document.getElementById('questions-container');
     const addQuestionBtn = document.getElementById('add-question-btn');
 
-    let questionIndex = 1;
+    let questionIndex = questionsContainer.children.length + 1; // Start from the next index based on existing questions
 
     addQuestionBtn.addEventListener('click', function() {
-        questionIndex++;
         const questionHTML = `
             <div class="question-form border p-3 mb-3" id="question-form-${questionIndex}">
                 <div class="d-flex align-items-center mb-2">
@@ -33,8 +32,18 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         questionsContainer.insertAdjacentHTML('beforeend', questionHTML);
 
-        const removeBtn = document.querySelector(`#question-form-${questionIndex} .remove-question-btn`);
+        // Add functionality to remove the question
+        const removeBtn = questionsContainer.querySelector(`#question-form-${questionIndex} .remove-question-btn`);
         removeBtn.addEventListener('click', function() {
+            this.closest('.question-form').remove();
+        });
+
+        questionIndex++; // Increment index for the next question
+    });
+
+    // Add functionality for existing questions to enable removal
+    document.querySelectorAll('.remove-question-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
             this.closest('.question-form').remove();
         });
     });
