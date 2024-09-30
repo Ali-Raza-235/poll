@@ -41,7 +41,7 @@ class Poll(models.Model):
         return self.title
     
 class Question(models.Model):
-    title = models.CharField(max_length=500, unique=True)
+    title = models.CharField(max_length=500)
     choices = models.TextField(help_text="Enter Choices By using comma to separte")
 
     def __str__(self) -> str:
@@ -57,7 +57,7 @@ class PollResponse(models.Model):
 class PollAnswer(models.Model):
     response = models.ForeignKey(PollResponse, on_delete=models.CASCADE, related_name="answers")
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer = models.CharField(max_length=500, null=True, blank=True)
+    answer = models.CharField(max_length=500)
 
     def __str__(self):
         return f"{self.response.user_email} - {self.question.title} - {self.answer}"

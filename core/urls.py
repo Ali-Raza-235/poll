@@ -28,9 +28,9 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('poll/<int:id>/', poll_detail, name='poll-detail'),
     path("", ListPollsView.as_view(), name="list-polls"),
-    path("poll-responses/<int:id>/", poll_responses, name="poll-responses"),
+    path('poll/<int:id>/', poll_detail, name='poll-detail'),
+    path("poll/<int:id>/responses", poll_responses, name="poll-responses"),
     path('api/' ,include('app.urls')),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

@@ -40,12 +40,17 @@ class PollSerializer(serializers.ModelSerializer):
         
         poll = Poll.objects.create(creater=user, **validated_data)
         
-        for question_data in questions_data:
-            question = Question.objects.create(**question_data)
-            poll.questions.add(question)
+        question_instances = [
+            Question(title=question_data['title'], choices=question_data['choices']) 
+            for question_data in questions_data
+        ]
         
+        Question.objects.bulk_create(question_instances)
+
+        poll.questions.add(*question_instances)
+
         return poll
-    
+
 class PollUpdateSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
 
@@ -65,8 +70,14 @@ class PollUpdateSerializer(serializers.ModelSerializer):
 
         if questions_data is not None:
             instance.questions.clear()
-            for question_data in questions_data:
-                question = Question.objects.create(**question_data)
-                instance.questions.add(question)
+
+            question_instances = [
+                Question(title=question_data['title'], choices=question_data['choices'])
+                for question_data in questions_data
+            ]
+
+            Question.objects.bulk_create(question_instances)
+
+            instance.questions.add(*question_instances)
 
         return instance

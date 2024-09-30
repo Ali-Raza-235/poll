@@ -4,14 +4,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 from django.contrib import messages, auth
+from .pagination import PollPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.authtoken.models import Token
 from .models import Poll, User, Question, PollAnswer, PollResponse
 from .serializers import PollSerializer, RegisterSerializer, LoginSerializer
-from django.db import transaction
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -26,12 +25,12 @@ class RegisterView(generics.CreateAPIView):
         if serializer.is_valid():
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
-            return redirect('/')
+            messages.success(request, "Your Accound has been registered successfully!")
+            return redirect('login')
         return render(request, 'register.html', {'errors': serializer.errors})
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
-    serializer_class = LoginSerializer
 
     def get(self, request, format=None):
         return render(request, 'login.html')
@@ -45,7 +44,8 @@ class LoginView(APIView):
         if user is not None:
             auth.login(request, user)
             token, created = Token.objects.get_or_create(user=user)
-            response = redirect('/')  # Adjust this to your desired redirect URL
+            messages.info(request, "You have been Logged In!")
+            response = redirect('/')
             response.set_cookie(key='auth_token', value=token.key)
             return response
         else:
@@ -57,12 +57,8 @@ class LogoutView(LoginRequiredMixin, APIView):
     def get(self, request, format=None):
         request.user.auth_token.delete()
         auth.logout(request)
+        messages.info(request, 'You have beeen logout!')
         return redirect('login')
-
-class PollPagination(PageNumberPagination):
-    page_size = 4
-    page_size_query_param = 'page_size'
-    max_page_size = 100
 
 class CreatePollView(LoginRequiredMixin, generics.CreateAPIView):
     queryset = Poll.objects.all()
@@ -90,7 +86,7 @@ class CreatePollView(LoginRequiredMixin, generics.CreateAPIView):
             options = [request.POST.get(f'questions[{question_index}][option{i+1}]') for i in range(3)]
 
             if question_text:
-                question = Question.objects.create(title=question_text, choices=','.join(filter(None, options)))
+                question, created = Question.objects.get_or_create(title=question_text, choices=','.join(filter(None, options)))
                 poll.questions.add(question)
 
             question_index += 1
@@ -156,21 +152,17 @@ class UpdatePollView(LoginRequiredMixin, APIView):
             try:
                 poll = Poll.objects.get(id=poll_id, creater=request.user)
 
-                # Update the poll title
                 poll.title = request.POST.get('poll', poll.title)
 
-                # Delete old questions
-                poll.questions.all().delete()
+                poll.questions.clear()
 
                 question_index = 1
                 while f'questions[{question_index}][question]' in request.POST:
                     question_text = request.POST.get(f'questions[{question_index}][question]')
                     options = [request.POST.get(f'questions[{question_index}][option{i+1}]') for i in range(3)]
 
-                    # Ensure question text is not empty
                     if question_text:
-                        # Create the question with title and choices
-                        question = Question.objects.create(title=question_text.strip(), choices=','.join(filter(None, options)))
+                        question, created = Question.objects.get_or_create(title=question_text.strip(), choices=','.join(filter(None, options)))
                         poll.questions.add(question)
 
                     question_index += 1
