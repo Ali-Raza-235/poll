@@ -1,6 +1,4 @@
-Here’s the `README.md` file content for your GitHub repository:
 
-```markdown
 # Poll Application
 
 This is a Django-based poll application that allows users to:
@@ -36,7 +34,3 @@ The project is deployed on an **Amazon EC2 Instance**, running on **port 8000** 
    ```
 7. The application will now be accessible at the EC2 public IP, such as [http://13.48.58.193:8000/](http://13.48.58.193:8000/).
 
-## Link to the Application
-
-You can access the deployed application here: [http://13.48.58.193:8000/](http://13.48.58.193:8000/).
-```
