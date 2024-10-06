@@ -4,7 +4,7 @@
 <div class="container form-poll">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="text-center">Update Poll</h3>
-        <a href="{% url 'list-polls' %}" class="btn btn-secondary">Back to Polls</a>
+        <a href="{% url 'user_polls' %}" class="btn btn-secondary">Back to Polls</a>
     </div>
     <form method="post">
         {% csrf_token %}
